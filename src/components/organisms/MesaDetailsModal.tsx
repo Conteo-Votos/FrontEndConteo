@@ -19,7 +19,7 @@ export const MesaDetailsModal = ({ mesa, onClose }: { mesa: Mesa | null, onClose
         
         <div className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            {mesa.estado === 'enviado' ? (
+            {mesa.estado === 'finalizado' ? (
                <CheckCircle className="w-5 h-5 text-green-500" />
             ) : mesa.estado === 'inconsistencia' ? (
                <FileWarning className="w-5 h-5 text-red-500" />
@@ -31,23 +31,23 @@ export const MesaDetailsModal = ({ mesa, onClose }: { mesa: Mesa | null, onClose
             </Typography>
           </div>
 
-          {mesa.votos ? (
+          {mesa.conteo ? (
             <div className="space-y-4">
               <div className="flex justify-between p-3 bg-carbon-800 rounded-lg border border-carbon-700">
                 <Typography variant="body" className="text-gray-300">Votos Válidos</Typography>
-                <Typography variant="h3">{mesa.votos.validos}</Typography>
+                <Typography variant="h3">{mesa.conteo.partidoRojo + mesa.conteo.partidoAzul + mesa.conteo.partidoVerde + mesa.conteo.partidoAmarillo}</Typography>
               </div>
               <div className="flex justify-between p-3 bg-carbon-800 rounded-lg border border-carbon-700">
                 <Typography variant="body" className="text-gray-300">Votos Nulos</Typography>
-                <Typography variant="h3">{mesa.votos.nulos}</Typography>
+                <Typography variant="h3">{mesa.conteo.nulos}</Typography>
               </div>
               <div className="flex justify-between p-3 bg-carbon-800 rounded-lg border border-carbon-700">
                 <Typography variant="body" className="text-gray-300">Votos en Blanco</Typography>
-                <Typography variant="h3">{mesa.votos.blancos}</Typography>
+                <Typography variant="h3">{mesa.conteo.blancos}</Typography>
               </div>
               <div className="flex justify-between p-3 bg-bronze-900/20 rounded-lg border border-bronze-500/30 mt-2">
-                <Typography variant="body" className="text-bronze-400 font-bold">Total Reportado</Typography>
-                <Typography variant="h3" className="text-bronze-400">{mesa.votos.total}</Typography>
+                <Typography variant="body" className="text-bronze-400 font-bold">Total Escrutado</Typography>
+                <Typography variant="h3" className="text-bronze-400">{mesa.conteo.totalEscaneadas}</Typography>
               </div>
             </div>
           ) : (
