@@ -6,7 +6,7 @@ import { FileWarning, CheckCircle, Clock } from 'lucide-react';
 
 type ActaRowProps = {
   mesa: string;
-  estado: 'enviado' | 'faltante' | 'inconsistencia';
+  estado: 'faltante' | 'escrutando' | 'finalizado' | 'inconsistencia';
   ultimaConexion?: string;
   onAction?: () => void;
 };
@@ -30,13 +30,14 @@ export const ActaRow = ({ mesa, estado, ultimaConexion, onAction }: ActaRowProps
       </div>
       
       <div className="flex items-center gap-4">
-        {estado === 'enviado' && <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" /> Enviado</Badge>}
+        {estado === 'finalizado' && <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1" /> Finalizado</Badge>}
+        {estado === 'escrutando' && <Badge variant="warning"><Clock className="w-3 h-3 mr-1" /> Escrutando</Badge>}
         {estado === 'faltante' && <Badge variant="warning"><Clock className="w-3 h-3 mr-1" /> Pendiente</Badge>}
         {estado === 'inconsistencia' && <Badge variant="error"><FileWarning className="w-3 h-3 mr-1" /> Inconsistencia</Badge>}
         
         {onAction && (
           <Button variant="outline" size="sm" onClick={onAction}>
-            {estado === 'faltante' ? 'Ingreso Manual' : 'Ver Detalles'}
+            {estado === 'faltante' ? 'Asignar' : 'Ver Detalles'}
           </Button>
         )}
       </div>

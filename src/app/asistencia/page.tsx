@@ -10,7 +10,7 @@ import { useState } from 'react';
 export default function Home() {
   const marcarAsistencia = useAppStore(state => state.marcarAsistencia);
   const mesa = useAppStore(state => state.mesas.find(m => m.id === '124'));
-  const [asistio, setAsistio] = useState(mesa?.personeroAsistio || false);
+  const [asistio, setAsistio] = useState(mesa?.miembroAsistio || false);
 
   const handleAsistencia = () => {
     marcarAsistencia('124');

@@ -17,10 +17,9 @@ export interface IApiResponse<T = any> {
 
 // Interfaz para la entidad Task (Arquitectura Notion para offline)
 export interface Task {
-  id: string; // UUID de la tarea
-  type: 'ENVIAR_ACTA' | 'MARCAR_ASISTENCIA' | 'SYNC_IMAGEN';
+  id: string;
+  type: 'ENVIAR_VOTO' | 'MARCAR_ASISTENCIA';
   payload: any;
-  createdAt: string;
-  status: 'PENDING' | 'ERROR';
+  status: 'pending' | 'syncing' | 'failed';
   retryCount: number;
 }

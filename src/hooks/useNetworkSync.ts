@@ -14,8 +14,8 @@ export function useNetworkSync() {
 
     for (const task of tasks) {
       try {
-        if (task.type === 'ENVIAR_ACTA') {
-          await apiClient.post('/actas/enviar', task.payload);
+        if (task.type === 'ENVIAR_VOTO') {
+          await apiClient.post('/votos/registrar', task.payload);
         } else if (task.type === 'MARCAR_ASISTENCIA') {
           await apiClient.post('/actas/asistencia', task.payload);
         }
