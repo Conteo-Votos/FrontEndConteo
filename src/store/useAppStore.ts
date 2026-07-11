@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Task } from '../services/interfaces';
 
 export type EstadoMesa = 'faltante' | 'enviado' | 'inconsistencia';
 export type Zona = 'Urbana' | 'Rural';
@@ -22,11 +23,21 @@ export interface Mesa {
 interface AppState {
   mesas: Mesa[];
   currentUserRole: 'personero' | 'admin' | null;
+  tasks: Task[]; // ARQUITECTURA NOTION: Cola de tareas offline
+  
+  // Acciones de autenticación
   login: (role: 'personero' | 'admin') => void;
   logout: () => void;
+  
+  // Acciones de mesas
   marcarAsistencia: (idMesa: string) => void;
   enviarActa: (idMesa: string, votos: Mesa['votos'], isOffline?: boolean) => void;
   resetearDatos: () => void;
+
+  // Acciones de Tasks (Offline)
+  enqueueTask: (task: Task) => void;
+  removeTask: (taskId: string) => void;
+  clearTasks: () => void;
 }
 
 const mockMesas: Mesa[] = [
@@ -49,14 +60,18 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       mesas: mockMesas,
       currentUserRole: null,
+      tasks: [],
+
       login: (role) => set({ currentUserRole: role }),
       logout: () => set({ currentUserRole: null }),
+      
       marcarAsistencia: (idMesa) =>
         set((state) => ({
           mesas: state.mesas.map((m) =>
             m.id === idMesa ? { ...m, personeroAsistio: true } : m
           ),
         })),
+        
       enviarActa: (idMesa, votos, isOffline = false) =>
         set((state) => ({
           mesas: state.mesas.map((m) => {
@@ -74,7 +89,12 @@ export const useAppStore = create<AppState>()(
             return m;
           }),
         })),
+        
       resetearDatos: () => set({ mesas: mockMesas }),
+
+      enqueueTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+      removeTask: (taskId) => set((state) => ({ tasks: state.tasks.filter(t => t.id !== taskId) })),
+      clearTasks: () => set({ tasks: [] }),
     }),
     {
       name: 'escrutinio-storage', 
