@@ -47,7 +47,7 @@ export const Sufragio = ({ mesaId }: { mesaId: string }) => {
           Presione el botón inferior SOLO cuando haya finalizado el horario de sufragio (4:00 PM). Esta acción es irreversible.
         </Typography>
         <Button 
-          variant="danger" 
+          variant="primary" 
           size="lg" 
           fullWidth 
           onClick={() => avanzarFase(mesaId)}

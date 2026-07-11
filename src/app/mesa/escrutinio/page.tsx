@@ -9,7 +9,6 @@ import { Typography } from '@/components/atoms/Typography';
 import { Button } from '@/components/atoms/Button';
 import { Camera, Check, X, ArrowLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid';
 
 export default function MiembroMesaEscrutinio() {
   const router = useRouter();

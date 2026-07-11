@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Task } from '../services/interfaces';
-import { v4 as uuidv4 } from 'uuid'; // I will use randomUUID or Date.now for personeros id
 
 export type FaseMesa = 'INSTALACION' | 'SUFRAGIO' | 'ESCRUTINIO' | 'CIERRE';
 export type EstadoMesa = 'faltante' | 'escrutando' | 'finalizado' | 'inconsistencia';
