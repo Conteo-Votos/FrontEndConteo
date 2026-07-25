@@ -57,29 +57,34 @@ interface AppState {
   mesas: Mesa[];
   personerosAcreditados: PersoneroAcreditado[];
   currentUserRole: 'miembro_mesa' | 'personero' | 'onpe' | null;
-  tasks: Task[]; // Cola offline
-  
+  tasks: Task[]; // Cola offline – solo contiene votos manuales pendientes de sync
+
   // Autenticación
   login: (role: 'miembro_mesa' | 'personero' | 'onpe') => void;
   logout: () => void;
-  
+
   // Fases de Mesa
   avanzarFase: (idMesa: string) => void;
   toggleAsistenciaMiembro: (idMesa: string, dni: string, isSuplente: boolean) => void;
   toggleChecklist: (idMesa: string, key: keyof ChecklistInstalacion) => void;
   incrementarVotante: (idMesa: string) => void;
-  
-  // Escrutinio
-  registrarVoto: (idMesa: string, voto: VotoCandidato) => void;
+
+  // Escrutinio 100% Manual
+  /**
+   * Registra el voto manualmente (sin IA).
+   * - Actualiza el conteo local de la mesa de forma optimista.
+   * - Encola una Task offline con { foto_base64, valor_voto, timestamp }.
+   */
+  registrarVotoManual: (idMesa: string, voto: VotoCandidato, foto_base64: string) => void;
   finalizarEscrutinio: (idMesa: string) => void;
-  
+
   // Personeros (CRUD Autoridad)
   agregarPersonero: (personero: Omit<PersoneroAcreditado, 'id'>) => void;
   eliminarPersonero: (id: string) => void;
 
   resetearDatos: () => void;
 
-  // Cola Offline
+  // Cola Offline (acceso directo para casos especiales como asistencia)
   enqueueTask: (task: Task) => void;
   removeTask: (taskId: string) => void;
   clearTasks: () => void;
@@ -166,23 +171,38 @@ export const useAppStore = create<AppState>()(
           ),
         })),
         
-      registrarVoto: (idMesa, voto) =>
-        set((state) => ({
-          mesas: state.mesas.map((m) => {
-            if (m.id === idMesa) {
-              const nuevoConteo = { ...m.conteo };
-              if (voto === 'PARTIDO_ROJO') nuevoConteo.partidoRojo++;
-              if (voto === 'PARTIDO_AZUL') nuevoConteo.partidoAzul++;
-              if (voto === 'PARTIDO_VERDE') nuevoConteo.partidoVerde++;
-              if (voto === 'PARTIDO_AMARILLO') nuevoConteo.partidoAmarillo++;
-              if (voto === 'BLANCO') nuevoConteo.blancos++;
-              if (voto === 'NULO') nuevoConteo.nulos++;
-              nuevoConteo.totalEscaneadas++;
-              return { ...m, conteo: nuevoConteo };
-            }
-            return m;
-          }),
-        })),
+      registrarVotoManual: (idMesa, voto, foto_base64) =>
+        set((state) => {
+          // 1. Actualizar conteo local (optimista)
+          const mesasActualizadas = state.mesas.map((m) => {
+            if (m.id !== idMesa) return m;
+            const nuevoConteo = { ...m.conteo };
+            if (voto === 'PARTIDO_ROJO')    nuevoConteo.partidoRojo++;
+            if (voto === 'PARTIDO_AZUL')    nuevoConteo.partidoAzul++;
+            if (voto === 'PARTIDO_VERDE')   nuevoConteo.partidoVerde++;
+            if (voto === 'PARTIDO_AMARILLO') nuevoConteo.partidoAmarillo++;
+            if (voto === 'BLANCO')          nuevoConteo.blancos++;
+            if (voto === 'NULO')            nuevoConteo.nulos++;
+            nuevoConteo.totalEscaneadas++;
+            return { ...m, conteo: nuevoConteo };
+          });
+
+          // 2. Construir Task offline con la nueva estructura
+          const nuevaTask: Task = {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+            mesaId: idMesa,
+            foto_base64,
+            valor_voto: voto,
+            timestamp: new Date().toISOString(),
+            status: 'pending',
+            retryCount: 0,
+          };
+
+          return {
+            mesas: mesasActualizadas,
+            tasks: [...state.tasks, nuevaTask],
+          };
+        }),
         
       finalizarEscrutinio: (idMesa) =>
         set((state) => ({

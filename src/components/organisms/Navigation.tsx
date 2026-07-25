@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { Typography } from '../atoms/Typography';
-import { LayoutDashboard, Camera, Users, Settings, LogOut, MapPin, Building2 } from 'lucide-react';
+import { LayoutDashboard, Camera, Users, LogOut, MapPin, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -19,7 +19,6 @@ export const Navigation = () => {
 
   const allLinks = [
     { href: '/asistencia', icon: Camera, label: 'Asistencia', roles: ['personero'] },
-    { href: '/captura', icon: Camera, label: 'Captura (Mesa)', roles: ['personero'] },
     { href: '/coordinador', icon: Building2, label: 'Local', roles: ['admin'] },
     { href: '/rural', icon: MapPin, label: 'Rural', roles: ['admin'] },
     { href: '/auditoria', icon: Users, label: 'Auditoría', roles: ['admin'] },

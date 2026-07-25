@@ -8,13 +8,17 @@ import { Button } from '@/components/atoms/Button';
 import { Instalacion } from './fases/Instalacion';
 import { Sufragio } from './fases/Sufragio';
 import { useRouter } from 'next/navigation';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, RotateCcw } from 'lucide-react';
+
+const IS_DEV = process.env.NODE_ENV === 'development';
 
 export default function MesaDashboard() {
   const router = useRouter();
   const [searchMesa, setSearchMesa] = useState('124');
-  
+  const [resetConfirm, setResetConfirm] = useState(false);
+
   const mesa = useAppStore(state => state.mesas.find(m => m.id === searchMesa));
+  const resetearDatos = useAppStore(state => state.resetearDatos);
 
   // Redirigir a la cámara si la fase es Escrutinio
   React.useEffect(() => {
@@ -23,17 +27,53 @@ export default function MesaDashboard() {
     }
   }, [mesa?.faseActual, router]);
 
+  const handleReset = () => {
+    if (!resetConfirm) {
+      // Primer clic: pide confirmación
+      setResetConfirm(true);
+      setTimeout(() => setResetConfirm(false), 3000); // auto-cancela en 3s
+      return;
+    }
+    // Segundo clic: ejecuta reset completo
+    resetearDatos();
+    localStorage.removeItem('escrutinio-storage-onpe-v1');
+    setResetConfirm(false);
+    router.push('/');
+  };
+
   const fases = ['INSTALACION', 'SUFRAGIO', 'ESCRUTINIO', 'CIERRE'];
   const currentIndex = mesa ? fases.indexOf(mesa.faseActual) : 0;
 
   return (
     <MobileLayout>
       <div className="flex flex-col min-h-[calc(100vh-4rem)] md:min-h-screen w-full max-w-lg mx-auto bg-carbon-900 p-6">
-        
-        {/* Encabezado Principal */}
-        <div className="mb-8">
-          <Typography variant="h3" className="mb-1">Mesa {searchMesa}</Typography>
-          <Typography variant="small" className="text-gray-400">Jornada Electoral en Vivo</Typography>
+
+        {/* ── Encabezado Principal ── */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <Typography variant="h3" className="mb-1">Mesa {searchMesa}</Typography>
+            <Typography variant="small" className="text-gray-400">Jornada Electoral en Vivo</Typography>
+          </div>
+
+          {/* BOTÓN DE RESET — solo visible en desarrollo */}
+          {IS_DEV && (
+            <button
+              id="btn-dev-reset"
+              onClick={handleReset}
+              title="Resetear todos los datos (solo en DEV)"
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold
+                border transition-all duration-200 active:scale-95
+                ${resetConfirm
+                  ? 'bg-red-500/20 border-red-500 text-red-400 animate-pulse'
+                  : 'bg-carbon-800 border-dashed border-carbon-600 text-gray-500 hover:border-red-500/60 hover:text-red-400'
+                }
+              `}
+            >
+              <RotateCcw className="w-3 h-3" />
+              {resetConfirm ? '¿Confirmar?' : 'Reset DEV'}
+            </button>
+          )}
         </div>
 
         {mesa ? (

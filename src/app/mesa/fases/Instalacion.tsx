@@ -12,17 +12,27 @@ export const Instalacion = ({ mesaId }: { mesaId: string }) => {
 
   if (!mesa) return null;
 
-  const canProceed = 
-    mesa.checklistInstalacion.materialRecibido && 
-    mesa.checklistInstalacion.anforaVacia && 
+  // Mínimo 3 miembros presentes en total (titulares + suplentes combinados)
+  const totalAsistentes =
+    mesa.miembrosTitulares.filter(m => m.asistio).length +
+    mesa.miembrosSuplentes.filter(m => m.asistio).length;
+
+  const canProceed =
+    mesa.checklistInstalacion.materialRecibido &&
+    mesa.checklistInstalacion.anforaVacia &&
     mesa.checklistInstalacion.actasListas &&
-    mesa.miembrosTitulares.filter(m => m.asistio).length >= 3; // Mínimo 3 miembros para abrir mesa
+    totalAsistentes >= 3;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="glass-panel p-5 rounded-2xl border border-carbon-700">
         <Typography variant="h3" className="mb-4 text-bronze-500">Asistencia de Miembros</Typography>
-        <Typography variant="small" className="text-gray-400 mb-4 block">Marque la asistencia de los titulares. Se requieren mínimo 3 personas.</Typography>
+        <div className="flex items-center justify-between mb-4">
+          <Typography variant="small" className="text-gray-400">Mínimo 3 presentes entre titulares y suplentes.</Typography>
+          <span className={`text-sm font-bold px-2 py-0.5 rounded-full border ${totalAsistentes >= 3 ? 'text-green-400 border-green-500/50 bg-green-500/10' : 'text-amber-400 border-amber-500/50 bg-amber-500/10'}`}>
+            {totalAsistentes}/3
+          </span>
+        </div>
         
         <div className="space-y-3 mb-6">
           <Typography variant="body" className="text-white font-medium">Titulares</Typography>
@@ -101,7 +111,9 @@ export const Instalacion = ({ mesaId }: { mesaId: string }) => {
         </Button>
         {!canProceed && (
           <Typography variant="small" className="text-center text-red-400 mt-2 block">
-            Complete todos los requisitos para continuar.
+            {totalAsistentes < 3
+              ? `Faltan ${3 - totalAsistentes} miembro(s) por marcar asistencia.`
+              : 'Complete el checklist físico para continuar.'}
           </Typography>
         )}
       </div>
